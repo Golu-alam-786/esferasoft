@@ -2,11 +2,11 @@ import 'package:esferasoft/model/note_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class DatabaseService {
-  static final DatabaseService instance = DatabaseService._init();
+class DatabaseController {
+  static final DatabaseController instance = DatabaseController._init();
   static Database? _database;
 
-  DatabaseService._init();
+  DatabaseController._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;

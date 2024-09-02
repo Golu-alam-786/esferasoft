@@ -1,4 +1,4 @@
-import 'package:esferasoft/views/screens/home_screen.dart';
+import 'package:esferasoft/views/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

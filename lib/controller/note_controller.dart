@@ -1,54 +1,3 @@
-// import 'package:get/get.dart';
-// import '../model/note_model.dart';
-// import 'database_controller.dart';
-//
-// class NoteController extends GetxController {
-//   var notes = <NotesModel>[].obs;
-//   var filteredNotes = <NotesModel>[].obs;
-//   RxString screenName = "All Notes".obs;
-//
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     fetchNotes();
-//   }
-//
-//   Future<void> fetchNotes() async {
-//     final fetchedNotes = await DatabaseService.instance.readAllNotes();
-//     notes.assignAll(fetchedNotes);
-//   }
-//
-//   Future<void> updateNotesByCategory() async {
-//     if(screenName.value == "All Notes") {
-//
-//       final fetchedNotes = await DatabaseService.instance.readAllNotes();
-//       notes.clear();
-//       filteredNotes.clear();
-//       notes.assignAll(fetchedNotes);
-//       filteredNotes.addAll(notes);
-//     }else if(screenName.value == "Work"){
-//       filteredNotes.addAll(notes.where((element) => element.category?.contains("Work")==true,).toList());
-//     }else{
-//       filteredNotes.addAll(notes.where((element) => element.category?.contains("Home")==true,).toList());
-//     }
-//
-//   }
-//
-//   Future<void> addNote(NotesModel note) async {
-//     await DatabaseService.instance.create(note);
-//     fetchNotes();
-//   }
-//   Future<void> updateNote(NotesModel note) async {
-//     await DatabaseService.instance.update(note);
-//     fetchNotes();
-//   }
-//
-//   Future<void> deleteNote(int id) async {
-//     await DatabaseService.instance.delete(id);
-//     fetchNotes();
-//   }
-// }
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
 import '../model/note_model.dart';
@@ -65,7 +14,6 @@ class NoteController extends GetxController {
   var filteredNotes = <NotesModel>[].obs;
   RxString screenName = "All Notes".obs;
 
-  // New Variables for AddNoteScreen
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   var selectedCategory = ''.obs;
@@ -80,14 +28,14 @@ class NoteController extends GetxController {
   }
 
   Future<void> fetchNotes() async {
-    final fetchedNotes = await DatabaseService.instance.readAllNotes();
+    final fetchedNotes = await DatabaseController.instance.readAllNotes();
     notes.assignAll(fetchedNotes);
     filteredNotes.addAll(fetchedNotes);
   }
 
   Future<void> updateNotesByCategory() async {
     if (screenName.value == "All Notes") {
-      final fetchedNotes = await DatabaseService.instance.readAllNotes();
+      final fetchedNotes = await DatabaseController.instance.readAllNotes();
       notes.clear();
       filteredNotes.clear();
       notes.assignAll(fetchedNotes);
@@ -128,13 +76,13 @@ class NoteController extends GetxController {
       createdAt: DateTime.now().toIso8601String(),
     );
 
-    await DatabaseService.instance.create(newNote);
+    await DatabaseController.instance.create(newNote);
     updateNotesByCategory();
     titleController.clear();
     contentController.clear();
     selectedImage.value = null;
     selectedCategory.value = '';
-    Get.back(); // Close the Add Note screen
+    Get.back();
   }
 
   Future<void> pickImage() async {
@@ -146,13 +94,16 @@ class NoteController extends GetxController {
 
   // Other CRUD operations
   Future<void> updateNote(NotesModel note, int index) async {
-    await DatabaseService.instance.update(note);
+
+    await DatabaseController.instance.update(note);
     filteredNotes[index] = note;
     notes[index] = note;
+
+
   }
 
   Future<void> deleteNote(int id) async {
-    await DatabaseService.instance.delete(id);
+    await DatabaseController.instance.delete(id);
     updateNotesByCategory();
   }
 }
