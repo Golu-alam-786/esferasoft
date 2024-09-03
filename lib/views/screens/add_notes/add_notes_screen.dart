@@ -24,9 +24,34 @@ class AddNoteScreen extends StatelessWidget {
             children: [
               GetAndSelectImageWidget(noteController: noteController),
               view.sizedBoxView(height: 20),
-              view.textFormFieldView(controller: noteController.titleController, hintText: 'Title'),
+              view.textFormFieldView(
+                controller: noteController.titleController,
+                hintText: 'Title',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Title is required';
+                  }
+                  if (value.length < 3) {
+                    return 'Title must be at least 3 characters long';
+                  }
+                  return null;
+                },
+              ),
               view.sizedBoxView(height: 10),
-              view.textFormFieldView(controller: noteController.contentController, hintText: 'Content', maxLines: 5),
+              view.textFormFieldView(
+                controller: noteController.contentController,
+                hintText: 'Content',
+                maxLines: 5,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Content is required';
+                  }
+                  if (value.length < 10) {
+                    return 'Content must be at least 10 characters long';
+                  }
+                  return null;
+                },
+              ),
               view.sizedBoxView(height: 10),
               const Padding(
                 padding: EdgeInsets.all(8.0),

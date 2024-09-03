@@ -56,9 +56,25 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
           children: [
             Obx(() => buildSelectImage()),
             view.sizedBoxView(height: 16),
-            view.textFormFieldView(controller: _titleController, labelText: 'Title'),
+            view.textFormFieldView(controller: _titleController, labelText: 'Title', validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Title is required';
+              }
+              if (value.length < 3) {
+                return 'Title must be at least 3 characters long';
+              }
+              return null;
+            },),
             view.sizedBoxView(height: 16),
-            view.textFormFieldView(controller: _contentController, labelText: 'Content'),
+            view.textFormFieldView(controller: _contentController, labelText: 'Content',validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Content is required';
+              }
+              if (value.length < 10) {
+                return 'Content must be at least 10 characters long';
+              }
+              return null;
+            },),
             view.sizedBoxView(height: 16),
             const Text(
               "Please Select category",
