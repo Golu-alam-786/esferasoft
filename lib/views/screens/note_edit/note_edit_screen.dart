@@ -18,6 +18,7 @@ class NoteEditScreen extends StatefulWidget {
 
 class _NoteEditScreenState extends State<NoteEditScreen> {
   final NoteController noteController = Get.find();
+  final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _titleController;
   late TextEditingController _contentController;
@@ -52,99 +53,119 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Obx(() => buildSelectImage()),
-            view.sizedBoxView(height: 16),
-            view.textFormFieldView(controller: _titleController, labelText: 'Title', validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Title is required';
-              }
-              if (value.length < 3) {
-                return 'Title must be at least 3 characters long';
-              }
-              return null;
-            },),
-            view.sizedBoxView(height: 16),
-            view.textFormFieldView(controller: _contentController, labelText: 'Content',validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Content is required';
-              }
-              if (value.length < 10) {
-                return 'Content must be at least 10 characters long';
-              }
-              return null;
-            },),
-            view.sizedBoxView(height: 16),
-            const Text(
-              "Please Select category",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            Obx(() => view.checkBoxListTile(
-              title: "Work",
-              value: noteController.isWorkCheckValue.value,
-              onChanged: (value) {
-                noteController.isWorkCheckValue.value = value ?? false;
-              },
-            )),
-            Obx(() => view.checkBoxListTile(
-              title: "Home",
-              value: noteController.isHomeCheckValue.value,
-              onChanged: (value) {
-                noteController.isHomeCheckValue.value = value ?? false;
-              },
-            )),
-            view.sizedBoxView(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              Obx(() => buildSelectImage()),
+              view.sizedBoxView(height: 16),
+              view.textFormFieldView(
+                controller: _titleController,
+                labelText: 'Title',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Title is required';
+                  }
+                  if (value.length < 3) {
+                    return 'Title must be at least 3 characters long';
+                  }
+                  return null;
+                },
+              ),
+              view.sizedBoxView(height: 16),
+              view.textFormFieldView(
+                controller: _contentController,
+                labelText: 'Content',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Content is required';
+                  }
+                  if (value.length < 10) {
+                    return 'Content must be at least 10 characters long';
+                  }
+                  return null;
+                },
+              ),
+              view.sizedBoxView(height: 16),
+              const Text(
+                "Please Select category",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              Obx(() => view.checkBoxListTile(
+                title: "Work",
+                value: noteController.isWorkCheckValue.value,
+                onChanged: (value) {
+                  noteController.isWorkCheckValue.value = value ?? false;
+                },
+              )),
+              Obx(() => view.checkBoxListTile(
+                title: "Home",
+                value: noteController.isHomeCheckValue.value,
+                onChanged: (value) {
+                  noteController.isHomeCheckValue.value = value ?? false;
+                },
+              )),
+              view.sizedBoxView(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
                     child: view.elevatedButtonView(
-                        onPressed: () async {
-                            if (!noteController.isWorkCheckValue.value && !noteController.isHomeCheckValue.value) {
-                              Get.snackbar(
-                                "Error",
-                                "Please select at least one category.",
-                                backgroundColor: Colors.redAccent.withOpacity(0.7),
-                                colorText: Colors.white,
-                              );
-                              return;
-                            }
-
-                            if (noteController.isWorkCheckValue.value && noteController.isHomeCheckValue.value) {
-                              noteController.selectedCategory.value = "Work,Home";
-                            } else if (noteController.isWorkCheckValue.value) {
-                              noteController.selectedCategory.value = "Work";
-                            } else if (noteController.isHomeCheckValue.value) {
-                              noteController.selectedCategory.value = "Home";
-                            }
-
-                            final note = NotesModel(
-                              id: widget.note?.id,
-                              title: _titleController.text,
-                              content: _contentController.text,
-                              category: noteController.selectedCategory.value,
-                              image: noteController.selectedImage.value?.path,
-                              createdAt: widget.note == null ? DateTime.now().toString() : widget.note!.createdAt,
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          if (!noteController.isWorkCheckValue.value &&
+                              !noteController.isHomeCheckValue.value) {
+                            Get.snackbar(
+                              "Error",
+                              "Please select at least one category.",
+                              backgroundColor: Colors.redAccent.withOpacity(0.7),
+                              colorText: Colors.white,
                             );
+                            return;
+                          }
 
-                            await noteController.updateNote(note, widget.index);
-                            Get.offAll(() => const HomeScreen());
+                          if (noteController.isWorkCheckValue.value &&
+                              noteController.isHomeCheckValue.value) {
+                            noteController.selectedCategory.value = "Work,Home";
+                          } else if (noteController.isWorkCheckValue.value) {
+                            noteController.selectedCategory.value = "Work";
+                          } else if (noteController.isHomeCheckValue.value) {
+                            noteController.selectedCategory.value = "Home";
+                          }
 
-                        },
-                        child: const Text("Save"),
-                        backgroundColor: const Color(0xFF515156))),
-                view.sizedBoxView(width: 10),
-                Expanded(
+                          final note = NotesModel(
+                            id: widget.note?.id,
+                            title: _titleController.text,
+                            content: _contentController.text,
+                            category: noteController.selectedCategory.value,
+                            image: noteController.selectedImage.value?.path,
+                            createdAt: widget.note == null
+                                ? DateTime.now().toString()
+                                : widget.note!.createdAt,
+                          );
+
+                          await noteController.updateNote(note, widget.index);
+                          Get.offAll(() => const HomeScreen());
+                        }
+                      },
+                      child: const Text("Save"),
+                      backgroundColor: const Color(0xFF515156),
+                    ),
+                  ),
+                  view.sizedBoxView(width: 10),
+                  Expanded(
                     child: view.elevatedButtonView(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        child: const Text("Cancel"),
-                        backgroundColor: Colors.redAccent.withOpacity(0.5))),
-              ],
-            ),
-          ],
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: const Text("Cancel"),
+                      backgroundColor: Colors.redAccent.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
