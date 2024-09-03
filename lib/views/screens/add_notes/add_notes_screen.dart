@@ -32,12 +32,12 @@ class AddNoteScreen extends StatelessWidget {
                 padding: EdgeInsets.all(8.0),
                 child: Align( alignment: Alignment.topLeft,child: Text("Please Select category", style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16))),
               ),
-              Obx(()=> view.checkBoxListTile(title: "Work", value: noteController.completedStatus.value, onChanged: (value) {
-                  noteController.completedStatus.value = value ?? false;
+              Obx(()=> view.checkBoxListTile(title: "Work", value: noteController.isWorkCheckValue.value, onChanged: (value) {
+                  noteController.isWorkCheckValue.value = value ?? false;
                 },),
               ),
-              Obx(()=> view.checkBoxListTile(title: "Home", value: noteController.completedStatus1.value, onChanged: (value) {
-                noteController.completedStatus1.value = value ?? false;
+              Obx(()=> view.checkBoxListTile(title: "Home", value: noteController.isHomeCheckValue.value, onChanged: (value) {
+                noteController.isHomeCheckValue.value = value ?? false;
               },),
               ),
               view.sizedBoxView(height: 20),

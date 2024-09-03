@@ -26,8 +26,8 @@ BottomAppBar bottomNavigationBar({required NoteController noteController}){
           mini: true,
           backgroundColor: const Color(0xFF515156),
           onPressed: () {
-            noteController.completedStatus.value = false;
-            noteController.completedStatus1.value = false;
+            noteController.isWorkCheckValue.value = false;
+            noteController.isHomeCheckValue.value = false;
             Get.to(() => AddNoteScreen());
           },
           shape:
@@ -37,7 +37,7 @@ BottomAppBar bottomNavigationBar({required NoteController noteController}){
             color: Colors.white,
           ),
         ),
-        const SizedBox(width: 20), // Space for the FAB
+        const SizedBox(width: 20),
         Obx(
               ()=> IconButton(
             style: noteController.selectedTabIndex == 2 ?  IconButton.styleFrom(backgroundColor: const Color(0xFF515156)) : null,

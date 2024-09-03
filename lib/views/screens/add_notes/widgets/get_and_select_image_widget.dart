@@ -1,9 +1,10 @@
-import 'package:esferasoft/controller/note_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../controller/note_controller.dart';
 
 class GetAndSelectImageWidget extends StatelessWidget {
   final NoteController noteController;
+
   const GetAndSelectImageWidget({super.key, required this.noteController});
 
   @override
@@ -17,13 +18,20 @@ class GetAndSelectImageWidget extends StatelessWidget {
       ),
       child: noteController.selectedImage.value != null
           ? ClipRRect(
-          borderRadius: BorderRadius.circular(100),
-          child: Image.file(noteController.selectedImage.value!, fit: BoxFit.cover))
+        borderRadius: BorderRadius.circular(100),
+        child: Image.file(
+          noteController.selectedImage.value!,
+          fit: BoxFit.cover,
+        ),
+      )
           : IconButton(
         onPressed: noteController.pickImage,
-        icon: const Icon(Icons.image,color: Colors.white,size: 70,),
+        icon: const Icon(
+          Icons.image,
+          color: Colors.white,
+          size: 70,
+        ),
       ),
     ));
-
   }
 }

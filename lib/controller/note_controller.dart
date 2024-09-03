@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import '../model/note_model.dart';
 import 'database_controller.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +8,8 @@ import 'package:flutter/material.dart';
 class NoteController extends GetxController {
   RxInt _selectedTabIndex = 0.obs;
   int get selectedTabIndex => _selectedTabIndex.value;
-  updateTabIndex(int index)=>_selectedTabIndex.value = index;
+  updateTabIndex(int index) => _selectedTabIndex.value = index;
+
   var notes = <NotesModel>[].obs;
   var filteredNotes = <NotesModel>[].obs;
   RxString screenName = "All Notes".obs;
@@ -18,8 +18,8 @@ class NoteController extends GetxController {
   final contentController = TextEditingController();
   var selectedCategory = ''.obs;
   Rx<File?> selectedImage = Rx<File?>(null);
-  var completedStatus = false.obs;
-  var completedStatus1 = false.obs;
+  var isWorkCheckValue = false.obs;
+  var isHomeCheckValue = false.obs;
 
   @override
   void onInit() {
@@ -28,26 +28,34 @@ class NoteController extends GetxController {
   }
 
   Future<void> fetchNotes() async {
-    final fetchedNotes = await DatabaseController.instance.readAllNotes();
-    notes.assignAll(fetchedNotes);
-    filteredNotes.addAll(fetchedNotes);
+    try {
+      final fetchedNotes = await DatabaseController.instance.readAllNotes();
+      notes.assignAll(fetchedNotes);
+      filteredNotes.addAll(fetchedNotes);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch notes: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
+    }
   }
 
   Future<void> updateNotesByCategory() async {
-    if (screenName.value == "All Notes") {
-      final fetchedNotes = await DatabaseController.instance.readAllNotes();
-      notes.clear();
-      filteredNotes.clear();
-      notes.assignAll(fetchedNotes);
-      filteredNotes.addAll(fetchedNotes);
-    } else if (screenName.value == "Work") {
-      filteredNotes.clear();
-      filteredNotes.addAll(
-          notes.where((element) => element.category?.contains("Work") == true).toList());
-    } else {
-      filteredNotes.clear();
-      filteredNotes.addAll(
-          notes.where((element) => element.category?.contains("Home") == true).toList());
+    try {
+      if (screenName.value == "All Notes") {
+        final fetchedNotes = await DatabaseController.instance.readAllNotes();
+        notes.clear();
+        filteredNotes.clear();
+        notes.assignAll(fetchedNotes);
+        filteredNotes.addAll(fetchedNotes);
+      } else if (screenName.value == "Work") {
+        filteredNotes.clear();
+        filteredNotes.addAll(
+            notes.where((element) => element.category?.contains("Work") == true).toList());
+      } else {
+        filteredNotes.clear();
+        filteredNotes.addAll(
+            notes.where((element) => element.category?.contains("Home") == true).toList());
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to filter notes: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
     }
   }
 
@@ -55,55 +63,67 @@ class NoteController extends GetxController {
     if (titleController.text.isEmpty ||
         contentController.text.isEmpty ||
         selectedImage.value == null ||
-        !(completedStatus.value || completedStatus1.value)) {
-      Get.snackbar('Error', 'Please fill all fields and select an image',backgroundColor: Colors.red.withOpacity(0.5),colorText: Colors.white);
+        !(isWorkCheckValue.value || isHomeCheckValue.value)) {
+      Get.snackbar('Error', 'Please fill all fields and select an image', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
       return;
     }
 
-    if (completedStatus.value && completedStatus1.value) {
-      selectedCategory.value = "Work,Home";
-    } else if (completedStatus.value) {
-      selectedCategory.value = "Work";
-    } else if (completedStatus1.value) {
-      selectedCategory.value = "Home";
+    try {
+      if (isWorkCheckValue.value && isHomeCheckValue.value) {
+        selectedCategory.value = "Work,Home";
+      } else if (isWorkCheckValue.value) {
+        selectedCategory.value = "Work";
+      } else if (isHomeCheckValue.value) {
+        selectedCategory.value = "Home";
+      }
+
+      NotesModel newNote = NotesModel(
+        title: titleController.text,
+        content: contentController.text,
+        category: selectedCategory.value,
+        image: selectedImage.value?.path,
+        createdAt: DateTime.now().toIso8601String(),
+      );
+
+      await DatabaseController.instance.create(newNote);
+      updateNotesByCategory();
+      titleController.clear();
+      contentController.clear();
+      selectedImage.value = null;
+      selectedCategory.value = '';
+      Get.back();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to add note: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
     }
-
-    NotesModel newNote = NotesModel(
-      title: titleController.text,
-      content: contentController.text,
-      category: selectedCategory.value,
-      image: selectedImage.value?.path,
-      createdAt: DateTime.now().toIso8601String(),
-    );
-
-    await DatabaseController.instance.create(newNote);
-    updateNotesByCategory();
-    titleController.clear();
-    contentController.clear();
-    selectedImage.value = null;
-    selectedCategory.value = '';
-    Get.back();
   }
 
   Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      selectedImage.value = File(pickedFile.path);
+    try {
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        selectedImage.value = File(pickedFile.path);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick image: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
     }
   }
 
-  // Other CRUD operations
   Future<void> updateNote(NotesModel note, int index) async {
-
-    await DatabaseController.instance.update(note);
-    filteredNotes[index] = note;
-    notes[index] = note;
-
-
+    try {
+      await DatabaseController.instance.update(note);
+      filteredNotes[index] = note;
+      notes[index] = note;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update note: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
+    }
   }
 
   Future<void> deleteNote(int id) async {
-    await DatabaseController.instance.delete(id);
-    updateNotesByCategory();
+    try {
+      await DatabaseController.instance.delete(id);
+      updateNotesByCategory();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete note: $e', backgroundColor: Colors.red.withOpacity(0.5), colorText: Colors.white);
+    }
   }
 }

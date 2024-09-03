@@ -38,19 +38,16 @@ class NoteViewScreen extends StatelessWidget {
             const SizedBox(height: 8.0),
             GetContentAndTitleWidget(title: "Content", data: note.content ?? "",),
             const SizedBox(height: 8.0),
-            if (note.category != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Category :   ${note.category!}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Category :   ${note.category?.isNotEmpty == true ? note.category! : "Not selected"}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
                 ),
               ),
-
-            // Action Buttons
+            ),
             Padding(
               padding: const EdgeInsets.only(top: 16.0),
               child: Row(
@@ -58,14 +55,14 @@ class NoteViewScreen extends StatelessWidget {
                 children: [
                   view.elevatedButtonView(onPressed: (){
                     if(note.category?.contains("Work") == true){
-                      noteController.completedStatus.value = true;
+                      noteController.isWorkCheckValue.value = true;
                     }else{
-                      noteController.completedStatus.value = false;
+                      noteController.isWorkCheckValue.value = false;
                     }
                     if(note.category?.contains("Home") == true){
-                      noteController.completedStatus1.value = true;
+                      noteController.isHomeCheckValue.value = true;
                     }else{
-                      noteController.completedStatus1.value = false;
+                      noteController.isHomeCheckValue.value = false;
                     }
                     Get.to(() => NoteEditScreen(
                       note: note,
